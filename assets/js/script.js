@@ -225,29 +225,33 @@
 
 })();
 
-const textArray = ["Lian", "Seorang Pengembang", "Design Web", "Pembuat Ide"];
-const typingElement = document.getElementById("typing");
+const textArray = ["Lian", "Orang biasa", "UI/UX", "Punya Ide"];
+const typingElement = document.getElementById("typingText");
+const title = document.getElementById("heroTitle");
+const cards = document.querySelectorAll(".motion");
+const navToggle = document.querySelector(".nav-toggle");
+const navLinks = document.getElementById("navLinks");
 
 let textIndex = 0;
 let charIndex = 0;
 let isDeleting = false;
 
-// efect typing
 function typeEffect() {
+    if (!typingElement) return;
     const currentText = textArray[textIndex];
     const speed = isDeleting ? 80 : 150;
 
     typingElement.textContent = currentText.substring(0, charIndex);
 
     if (!isDeleting && charIndex < currentText.length) {
-        charIndex++;
+        charIndex += 1;
     } else if (isDeleting && charIndex > 0) {
-        charIndex--;
+        charIndex -= 1;
     } else if (!isDeleting && charIndex === currentText.length) {
         isDeleting = true;
         setTimeout(typeEffect, 1000);
         return;
-    } else if (isDeleting && charIndex === 0) {
+    } else {
         isDeleting = false;
         textIndex = (textIndex + 1) % textArray.length;
     }
@@ -255,39 +259,66 @@ function typeEffect() {
     setTimeout(typeEffect, speed);
 }
 
-typeEffect();
+if (typingElement) {
+    typeEffect();
+}
 
-const title = document.getElementById('heroTitle');
+if (title) {
+    title.addEventListener("mouseenter", () => {
+        title.classList.add("shimmer");
+    });
 
+    title.addEventListener("animationend", () => {
+        title.classList.remove("shimmer");
+    });
 
-title.addEventListener('mouseenter', () => {
-    title.classList.add('shimmer');
-});
+    setInterval(() => {
+        title.classList.add("shimmer");
+        setTimeout(() => title.classList.remove("shimmer"), 1800);
+    }, 5200);
+}
 
+if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("show");
+                }
+            });
+        },
+        { threshold: 0.2 }
+    );
 
-title.addEventListener('animationend', () => {
-    title.classList.remove('shimmer');
-});
+    cards.forEach((card) => observer.observe(card));
+} else {
+    cards.forEach((card) => card.classList.add("show"));
+}
 
-setInterval(() => {
-    title.classList.toggle('shimmer');
-}, 3000);
+if (navToggle && navLinks) {
+    const closeMenu = () => {
+        navLinks.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+    };
 
-const cards = document.querySelectorAll('.motion');
+    navToggle.addEventListener("click", () => {
+        const isOpen = navLinks.classList.toggle("open");
+        navToggle.setAttribute("aria-expanded", String(isOpen));
+    });
 
-const observer = new IntersectionObserver(
-    (entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('show');
-            } else {
-                entry.target.classList.remove('show');
-            }
-        });
-    },
-    {
-        threshold: 0.3 
-    }
-);
+    navLinks.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", closeMenu);
+    });
 
-cards.forEach(card => observer.observe(card));
+    document.addEventListener("click", (event) => {
+        if (!navLinks.contains(event.target) && !navToggle.contains(event.target)) {
+            closeMenu();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeMenu();
+        }
+    });
+}
