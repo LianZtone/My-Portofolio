@@ -506,7 +506,6 @@ footer.site-footer {
     margin-top: 10px;
     display: flex;
     justify-content: flex-end;
-    
 }
 
 @media (max-width: 900px) {
